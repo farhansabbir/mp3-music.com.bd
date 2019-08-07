@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import threading
 import urllib
+import json
 import sys
 import re
 import os
@@ -18,7 +19,7 @@ regex = r'^'+base+"([a-zA-Z0-9\s]){1,}"
 STAT = dict()
 
 def mp3Writer(albumname, url):
-    STAT[albumname][url[url.rfind('/')+1:]] = dict()
+    #STAT[albumname][url[url.rfind('/')+1:]] = dict()
     if os.path.exists(albumname + os.path.sep + url[url.rfind('/')+1:]):
         STAT[albumname]["files"]["skipped"].append(url[url.rfind('/')+1:])
         return
@@ -46,3 +47,9 @@ for album in (soup.find_all('a',{'class':'list-group-item'})):
             if 'mp3' in data.get('href'):
                 url = "http:" + str(data.get('href'))[:-5]
                 threading.Thread(target=mp3Writer,args=(albumname,url)).start()
+print("Albums: " + str(len(STAT.keys())))
+for album in STAT.keys():
+    print(r"  Album: " + album)
+    print(r"      Folder existed: " + str(STAT[album]["skipped"]))
+    print(r"      Downloaded file: " + str(len(STAT[album]["files"]["created"])))
+    print(r"      Skipped downloads: " + str(len(STAT[album]["files"]["skipped"])))
